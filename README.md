@@ -14,7 +14,7 @@ This simple library implements an ordered map that has:
 ## Interfaces
 
 `OrderedMap[K comparable, V any]` is a general-purpose ordered map. Create an
-ordered map with `NewOrderdMap()` or `NewOrderedMapN()`. Then use its
+ordered map with `NewOrderedMap()` or `NewOrderedMapN()`. Then use its
 `Set()` function to assign a value, and `Get()` to retrieve a value. The
 rest of the functions in the interface are fairly self-explainitory.
 
