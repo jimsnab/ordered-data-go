@@ -18,7 +18,8 @@ ordered map with `NewOrderedMap()` or `NewOrderedMapN()`. Then use its
 `Set()` function to assign a value, and `Get()` to retrieve a value. The
 rest of the functions in the interface are fairly self-explainitory.
 
-`StringMap` is a convenience alias for `OrderedMap[string, any]`.
+`StringMap` is a convenience alias for `OrderedMap[string, any]`. Create a
+string map with `NewStringMap()` or `NewStringMapN()`
 
 ## Unmarshaling
 
@@ -27,7 +28,7 @@ points to, and then `json.Unmarshal` will fill it.
 
 Example:
 ```go
-    m := NewOrderedMap[string, any]()
+	m := NewOrderedMap[string, any]()
 	if err := json.Unmarshal(orderedJson1Json, &m); err != nil {
 		panic(err)
 	}

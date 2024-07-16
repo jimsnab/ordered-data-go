@@ -31,8 +31,8 @@ type (
 		Keys() []K
 		Len() int
 		Values() []V
-		Clone() OrderedMap[K,V]
-		Copy(other OrderedMap[K,V], keys ...K)
+		Clone() OrderedMap[K, V]
+		Copy(other OrderedMap[K, V], keys ...K)
 		Remove(k ...K)
 		String() string
 
