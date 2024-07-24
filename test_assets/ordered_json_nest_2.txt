@@ -1,0 +1,1 @@
+{"last": {"id": "063AADQ", "id_link": nil, "bool": true, "n": 1.23}}

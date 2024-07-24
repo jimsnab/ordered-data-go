@@ -368,7 +368,7 @@ func (om *orderedMap[K, V]) Remove(keys ...K) {
 	om.order = newOrder
 }
 
-func (om *orderedMap[K, V]) String() string {
+func (om orderedMap[K, V]) String() string {
 	var sb strings.Builder
 
 	sb.WriteRune('{')
@@ -387,7 +387,17 @@ func (om *orderedMap[K, V]) String() string {
 			if anyVal == nil {
 				sb.WriteString(fmt.Sprintf(`%s: nil`, jsonEscape(k)))
 			} else {
-				sb.WriteString(fmt.Sprintf(`%s: %v`, jsonEscape(k), reflect.Indirect(rv)))
+				str, is := anyVal.(string)
+				if is {
+					str = fmt.Sprintf(`"%s"`, str)
+				} else {
+					str, is = convertToString(anyVal)
+				}
+				if is {
+					sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), str))
+				} else {
+					sb.WriteString(fmt.Sprintf(`%s: %#v`, jsonEscape(k), anyVal))
+				}
 			}
 		} else {
 			sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), jsonEscape(v)))
@@ -411,5 +421,21 @@ func jsonEscape[V any](v V) string {
 
 	// Remove the trailing newline added by Encode
 	escapedString = escapedString[:len(escapedString)-1]
+
 	return escapedString
+}
+
+func convertToString(v any) (string, bool) {
+	if str, ok := v.(fmt.Stringer); ok {
+		return str.String(), true
+	}
+
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Ptr && !rv.IsNil() {
+		if str, ok := rv.Interface().(fmt.Stringer); ok {
+			return str.String(), true
+		}
+	}
+
+	return "", false
 }

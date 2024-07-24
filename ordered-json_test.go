@@ -3,6 +3,7 @@ package ordereddata
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	_ "embed"
@@ -13,6 +14,15 @@ var orderedJson1Json []byte
 
 //go:embed "test_assets/ordered_json_2.json"
 var orderedJson2Json []byte
+
+//go:embed "test_assets/ordered_json_nest_1.json"
+var orderedJsonNest1Json []byte
+
+//go:embed "test_assets/ordered_json_nest_2.json"
+var orderedJsonNest2Json []byte
+
+//go:embed "test_assets/ordered_json_nest_2.txt"
+var orderedJsonNest2Txt string
 
 func TestOrderedJson(t *testing.T) {
 
@@ -46,6 +56,39 @@ func TestOrderedStringMap(t *testing.T) {
 	}
 
 	if !bytes.Equal(raw, orderedJson2Json) {
+		t.Error("did not get expected output")
+	}
+}
+
+func TestOrderedStringMapNesting(t *testing.T) {
+
+	m := NewStringMap()
+	err := json.Unmarshal(orderedJsonNest1Json, &m)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	raw, err := json.Marshal(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !bytes.Equal(raw, orderedJsonNest2Json) {
+		t.Error("did not get expected output")
+	}
+}
+
+func TestOrderedStringify(t *testing.T) {
+
+	m := NewStringMap()
+	err := json.Unmarshal(orderedJsonNest1Json, &m)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.String()
+
+	if s != orderedJsonNest2Txt {
 		t.Error("did not get expected output")
 	}
 }
