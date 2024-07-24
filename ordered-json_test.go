@@ -49,3 +49,24 @@ func TestOrderedStringMap(t *testing.T) {
 		t.Error("did not get expected output")
 	}
 }
+
+func TestJsonEscape(t *testing.T) {
+	tests := []struct {
+		input    interface{}
+		expected string
+	}{
+		{`A string with "double quotes"`, `"A string with \"double quotes\""`},
+		{`A string with a unicode character: \u2028`, `"A string with a unicode character: \\u2028"`},
+		{`Plain string`, `"Plain string"`},
+		{123, "123"},
+		{true, "true"},
+		{[]string{"a", "b", "c"}, `["a","b","c"]`},
+	}
+
+	for _, test := range tests {
+		result := jsonEscape(test.input)
+		if result != test.expected {
+			t.Errorf("jsonEscape(%v) = %v; want %v", test.input, result, test.expected)
+		}
+	}
+}

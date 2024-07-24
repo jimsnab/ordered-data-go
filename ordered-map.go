@@ -381,20 +381,35 @@ func (om *orderedMap[K, V]) String() string {
 
 		rv := reflect.ValueOf(v)
 		if !rv.IsValid() {
-			sb.WriteString(fmt.Sprintf(`"%v": nil`, k))
+			sb.WriteString(fmt.Sprintf(`%s: nil`, jsonEscape(k)))
 		} else if rv.CanInterface() {
 			anyVal := reflect.Indirect(rv).Interface()
 			if anyVal == nil {
-				sb.WriteString(fmt.Sprintf(`"%v": nil`, k))
+				sb.WriteString(fmt.Sprintf(`%s: nil`, jsonEscape(k)))
 			} else {
-				sb.WriteString(fmt.Sprintf(`"%v": "%v"`, k, reflect.Indirect(rv)))
+				sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), jsonEscape(reflect.Indirect(rv))))
 			}
 		} else {
-			sb.WriteString(fmt.Sprintf(`"%v": "%v"`, k, v))
+			sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), jsonEscape(v)))
 		}
 	}
 
 	sb.WriteRune('}')
 
 	return sb.String()
+}
+
+func jsonEscape[V any](v V) string {
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false) // To prevent escaping HTML characters
+	err := encoder.Encode(v)
+	if err != nil {
+		panic(err)
+	}
+	escapedString := buf.String()
+
+	// Remove the trailing newline added by Encode
+	escapedString = escapedString[:len(escapedString)-1]
+	return escapedString
 }
