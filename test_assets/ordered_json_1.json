@@ -2,5 +2,10 @@
     "cat": "\"meow\"",
     "bird": "cheep",
     "dog": "woof",
-    "pets": 3
+    "pets": 3,
+    "names":[
+        "\"misty\"",
+        "\"rupert\"",
+        "\"sparky\""
+    ]
 }

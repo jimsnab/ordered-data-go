@@ -1,6 +1,7 @@
 package ordereddata
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -18,6 +19,8 @@ type (
 		line int
 	}
 )
+
+var ErrInvaldJsonValue = errors.New("invalid json value")
 
 func newOrderedJson(content []byte) *orderedJson {
 	return &orderedJson{
@@ -246,6 +249,57 @@ func (oj *orderedJson) peekJsonMap(pp parserPos) (m StringMap, nextPp parserPos,
 	return
 }
 
+func (oj *orderedJson) peekJsonArray(pp parserPos) (a []any, nextPp parserPos, err error) {
+	var r rune
+
+	previewPp := pp
+	pp = oj.skipWhitespace(pp)
+	r, pp = oj.peekNextRune(pp)
+	if r != '[' {
+		err = fmt.Errorf("expected start of array at %s", oj.preview(previewPp))
+		return
+	}
+
+	oa := []any{}
+	for {
+		pp = oj.skipWhitespace(pp)
+
+		previewPp = pp
+		r, pp = oj.peekNextRune(pp)
+		if r == ']' {
+			break
+		}
+
+		if len(oa) != 0 {
+			if r != ',' {
+				err = fmt.Errorf("missing comma in array at %s", oj.preview(previewPp))
+				return
+			}
+			previewPp = pp
+		}
+
+		pp = oj.skipWhitespace(previewPp) // goes back a character if no ] or , delimeter
+
+		var value any
+		var terr error
+		value, pp, terr = oj.peekJsonValue(pp)
+		if terr != nil {
+			err = terr
+			return
+		}
+		if pp.line == 0 {
+			err = fmt.Errorf("expected value at %s", oj.preview(previewPp))
+			return
+		}
+
+		oa = append(oa, value)
+	}
+
+	a = oa
+	nextPp = pp
+	return
+}
+
 func (oj *orderedJson) peekJsonValue(pp parserPos) (val any, nextPp parserPos, err error) {
 	pp = oj.skipWhitespace(pp)
 
@@ -270,15 +324,22 @@ func (oj *orderedJson) peekJsonValue(pp parserPos) (val any, nextPp parserPos, e
 		return
 	}
 
-	var om StringMap
-	om, nextPp, err = oj.peekJsonMap(pp)
-	if err != nil {
-		return
-	}
-	if nextPp.line != 0 {
-		val = om
-		return
+	om, nextPp, terr := oj.peekJsonMap(pp)
+	if terr == nil {
+		if nextPp.line != 0 {
+			val = om
+			return
+		}
 	}
 
+	oa, nextPp, terr := oj.peekJsonArray(pp)
+	if terr == nil {
+		if nextPp.line != 0 {
+			val = oa
+			return
+		}
+	}
+
+	err = ErrInvaldJsonValue
 	return
 }
