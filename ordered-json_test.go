@@ -3,7 +3,6 @@ package ordereddata
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	_ "embed"

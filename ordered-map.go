@@ -387,16 +387,14 @@ func (om orderedMap[K, V]) String() string {
 			if anyVal == nil {
 				sb.WriteString(fmt.Sprintf(`%s: nil`, jsonEscape(k)))
 			} else {
-				str, is := anyVal.(string)
-				if is {
-					str = fmt.Sprintf(`"%s"`, str)
+				if rv.Kind() == reflect.Slice || rv.Kind() == reflect.Array {
+					sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), stringifyArray(rv)))
 				} else {
-					str, is = convertToString(anyVal)
-				}
-				if is {
-					sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), str))
-				} else {
-					sb.WriteString(fmt.Sprintf(`%s: %#v`, jsonEscape(k), anyVal))
+					if str, is := convertToString(anyVal); is {
+						sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), str))
+					} else {
+						sb.WriteString(fmt.Sprintf(`%s: %#v`, jsonEscape(k), anyVal))
+					}
 				}
 			}
 		} else {
@@ -437,5 +435,27 @@ func convertToString(v any) (string, bool) {
 		}
 	}
 
+	if rv.Kind() == reflect.String {
+		return fmt.Sprintf(`"%v"`, v), true
+	}
+
 	return "", false
+}
+
+func stringifyArray(rv reflect.Value) string {
+	var sb strings.Builder
+	sb.WriteString("[")
+	for i := 0; i < rv.Len(); i++ {
+		if i > 0 {
+			sb.WriteString(", ")
+		}
+		elem := rv.Index(i).Interface()
+		str, is := convertToString(elem)
+		if !is {
+			str = fmt.Sprintf("%v", elem)
+		}
+		sb.WriteString(str)
+	}
+	sb.WriteString("]")
+	return sb.String()
 }
