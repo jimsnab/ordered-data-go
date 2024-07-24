@@ -387,7 +387,7 @@ func (om *orderedMap[K, V]) String() string {
 			if anyVal == nil {
 				sb.WriteString(fmt.Sprintf(`%s: nil`, jsonEscape(k)))
 			} else {
-				sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), jsonEscape(reflect.Indirect(rv))))
+				sb.WriteString(fmt.Sprintf(`%s: %v`, jsonEscape(k), reflect.Indirect(rv)))
 			}
 		} else {
 			sb.WriteString(fmt.Sprintf(`%s: %s`, jsonEscape(k), jsonEscape(v)))
